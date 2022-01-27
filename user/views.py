@@ -51,10 +51,11 @@ def sign_up(request):
             # 패스워드가 같지 않다고 알림
             return render(request, 'user/signup.html', {'error':'패스워드를 확인 해 주세요.'})
         else:
+            # 만약 유저네임과 비밀번호 둘중하나라도 공란이라면 
             if username == '' or password == '':
                 return render(request, 'user/signup.html', {'error':'이름과 비밀번호를 입력 해 주세요.'})
+
             exist_user = get_user_model().objects.filter(username=username)
-            
             if exist_user:
                 # 다시 회원가입 페이지를 띄워준다.
                 return render(request, 'user/signup.html', {'error':'이미 존재하는 아이디입니다.'})
@@ -67,4 +68,29 @@ def sign_up(request):
 @login_required
 def logout(request):
     auth.logout(request)
-    return redirect('/')
+    return redirect('/sign-in')
+
+
+@login_required
+def user_view(request):
+    if request.method == 'GET':
+        # 사용자를 불러오기, exclude와 request.user.username 를 사용해서 '로그인 한 사용자'를 제외하기
+        # 나를 제외한 사용자의 리스트를 갖고온다.
+        user_list = UserModel.objects.all().exclude(username=request.user.username)
+        return render(request, 'user/user_list.html', {'user_list': user_list})
+
+
+@login_required
+def user_follow(request, id):
+    # 로그인한 사용자
+    me = request.user
+    # 내가 방금 팔로우 누른 사람
+    click_user = UserModel.objects.get(id=id)
+    # 내가 팔로우한 사람의 모든 사람중에서 이미 내가 있다면
+    if me in click_user.followee.all():
+        # 팔로우에서 나를 제거해줘라
+        click_user.followee.remove(request.user)
+    else:
+        # 그게 아니라면 추가해줘라
+        click_user.followee.add(request.user)
+    return redirect('/user')

@@ -3,44 +3,124 @@ from .models import UserModel
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-import time
 from bs4 import BeautifulSoup
 import requests
-import os
 
 
 def home(request):
-    hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': (
+    mobile_hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': (
         'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
-
+    pc_hdr = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
     url = 'https://www.op.gg/champion/statistics'
-    req = requests.get(url, headers=hdr)
+
+    req = requests.get(url, headers=mobile_hdr)
+
     html = req.text
     s = BeautifulSoup(html, 'html.parser')
-    message = ''
+    # 시작
+    first = s.find("div", {"class": 'by-champion__wrapper by-champion__wrapper--champion-list'})
+    second = first.select_one('div')
+    pos_rec = []
+    result_rec = []
+    rank = ["Best", "Excellent", "Great", "Nice", "Good"]
+    img_rank = ["../static/image/tier/challenger.png", "../static/image/tier/grandmaster.png",
+                "../static/image/tier/master.png", "../static/image/tier/diamond.png",
+                "../static/image/tier/platinum.png"]
+
+    for i, z in enumerate(['가렌', '갈리오', '갱플랭크', '엘리스', '다리우스']):
+
+        third = second.find('div', {"data-champion-name": z})
+        fourth = third.select_one('a')['href']
+
+        s_link = ('https://www.op.gg' + fourth)
+        pc_answer = requests.get(s_link, headers=pc_hdr)
+        pc_html = pc_answer.text
+
+        pc_so = BeautifulSoup(pc_html, 'html.parser')
+        pc_pic = pc_so.find("div", {"class": 'champion-box-content'})
+
+        pc_rate = pc_pic.find_all('div', {'champion-stats-trend-rate'})
+        pc_picrate = pc_rate[1].get_text().strip()
+        pc_winrate = pc_rate[0].get_text().strip()
+
+
+        s_answer = requests.get(s_link, headers=mobile_hdr)
+        s_html_image = s_answer.text
+
+        s_so = BeautifulSoup(s_html_image, 'html.parser')
+        count = []
+        champ_src = s_so.select_one('div.champion__image > img')['src']
+        s_img = s_so.find("table", {
+            "class": 'matchup-summary__list matchup-summary__list--table tabItem ChampionMatchupSummaryTable-Strong'})
+
+        for u in range(1, 4):
+            ab = s_img.select_one('tr:nth-child(' + str(u) + ')> td > img')['src']
+            count.append(ab)
+
+        rec_champ_info = {
+            'src': champ_src,
+            'win': pc_winrate,
+            'pick': pc_picrate,
+            'counter_img': count
+        }
+
+        rec_champ_list = {
+            'rank_img': img_rank[i],
+            'rank': rank[i],
+            'name': z,
+            'info': rec_champ_info
+        }
+        result_rec.append(rec_champ_list)
+    # 끝
     for lane in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']:
-        message = lane + ' 상위 5 챔피언\n'
         soup = s.find("div", {
             "class": "detail-ranking__content detail-ranking__content--champ-list ChampionRankingList-WinRatio-{} tabItem".format(
                 lane)})
+        paths = soup.select_one('ul')
         names = soup.find_all("div", {"class": "champion-ratio__name"})[:5]
         infos = soup.find_all("div", {"class": "champion-ratio__percent"})[:10]
-        for idx in range(5):
-            message += (str(idx + 1) + '. ' + names[idx].text.strip() + '\n')
-            message += ('   ' + infos[2 * idx].text.strip().replace('\n', ' ') + ' ' + infos[
-                2 * idx + 1].text.strip().replace('\n', ' ')) + '\n'
-        message += '\n'
-        crawling = message
+        num = ['1st', '2nd', '3rd', '4th', '5th']
+
+        for idx in range(1, 6):
+            path = paths.select_one('li:nth-child(' + str(idx) + ')>a')['href']
+            link = ('https://www.op.gg' + path)
+            answer = requests.get(link, headers=mobile_hdr)
+            html_image = answer.text
+            so = BeautifulSoup(html_image, 'html.parser')
+            soup_image = so.find("div", {"class": "champion tabWrap"})
+            aa = soup_image.select_one('div > div > img')
+            image_list = aa['src']
+
+            champ = {'num': num[idx - 1],
+                     'name': names[idx - 1].text.strip(),
+                     'win': infos[2 * (idx - 1)].text.strip().replace('\n', ' '),
+                     'pick': infos[2 * (idx - 1) + 1].text.strip().replace('\n', ' '),
+                     'img': image_list}
+
+            position = {'line': lane,
+                        'info': champ}
+            pos_rec.append(position)
+
 
 
     user = request.user.is_authenticated
+    id_name = request.user.id
+    compare_user = UserModel.objects.get(id=id_name)
+
+
     if user:
-        return render(request, 'user/user_list.html', {'crawling': crawling})
+        if request.method == 'GET':
+            compare = compare_user.follow.all()
+
+        return render(request, 'home.html', {'crawling': pos_rec, 'result_rec': result_rec, 'user_list' : compare})
     else:
         return redirect('/sign-in')
 
 
+
 def sign_in(request):
+    sign_up(request)
     if request.method == 'POST':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
@@ -52,7 +132,7 @@ def sign_in(request):
             auth.login(request, me)
             return redirect('/')
         else:
-            return render(request, 'user/signin.html', {'error': '유저이름 혹은 패스워드를 확인 해 주세요.'})
+            return render(request, 'entrance.html', {'error': '유저이름 혹은 패스워드를 확인 해 주세요.'})
 
     elif request.method == 'GET':
         user = request.user.is_authenticated
@@ -61,7 +141,7 @@ def sign_in(request):
             return redirect('/')
 
         else:
-            return render(request, 'user/signin.html')
+            return render(request, 'entrance.html')
 
 
 def sign_up(request):
@@ -80,23 +160,23 @@ def sign_up(request):
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
-        bio = request.POST.get('bio', '')
+        nickname = request.POST.get('nickname', '')
 
         if password != password2:
             # 패스워드가 같지 않다고 알림
-            return render(request, 'user/signup.html', {'error': '패스워드를 확인 해 주세요.'})
+            return render(request, 'entrance.html', {'error': '패스워드를 확인 해 주세요.'})
         else:
-            # 만약 유저네임과 비밀번호 둘중하나라도 공란이라면 
+            # 만약 유저네임과 비밀번호 둘중하나라도 공란이라면
             if username == '' or password == '':
-                return render(request, 'user/signup.html', {'error': '이름과 비밀번호를 입력 해 주세요.'})
+                return render(request, 'entrance.html', {'error': '이름과 비밀번호를 입력 해 주세요.'})
 
             exist_user = get_user_model().objects.filter(username=username)
             if exist_user:
                 # 다시 회원가입 페이지를 띄워준다.
-                return render(request, 'user/signup.html', {'error': '이미 존재하는 아이디입니다.'})
-            # 중복되는 아이디가 없다면     
+                return render(request, 'entrance.html', {'error': '이미 존재하는 아이디입니다.'})
+            # 중복되는 아이디가 없다면
             else:
-                UserModel.objects.create_user(username=username, password=password, bio=bio)
+                UserModel.objects.create_user(username=username, password=password, nickname=nickname)
                 return redirect('/sign-in')
 
 
@@ -129,5 +209,3 @@ def user_follow(request, id):
         # 그게 아니라면 추가해줘라
         click_user.followee.add(request.user)
     return redirect('/user')
-
-

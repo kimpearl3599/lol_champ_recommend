@@ -17,9 +17,9 @@
         <div id="entrance-logo"></div>
 
 
-        <form class="login" method="post" action="/sign-in/">
-            <p id="login-text">로그인</p>
+        <form class="login" method="post" action="/">
             {% csrf_token %}
+            <p id="login-text">로그인</p>
             <div class="input-container">
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name = "username">
@@ -37,10 +37,9 @@
             <p id="login-text2">계정이 없으신가요? <span id="return-register" onclick="register()">가입하기</span></p>
         </form>
 
-        <form class="register" method="post" action="/sign-in/">
+        <form class="register" method="post" action="/">
+            {% csrf_token %}
             <p id="login-text">회원 가입</p>
-
-                {% csrf_token %}
                 <div class="input-container">
                     <div class="form-floating mb-3">
                         <input type="email" class="form-control" placeholder="name@example.com" name = "username">

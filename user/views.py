@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from bs4 import BeautifulSoup
 import requests
 
-
+@login_required
 def home(request):
     mobile_hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': (
         'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
@@ -43,7 +43,6 @@ def home(request):
         pc_rate = pc_pic.find_all('div', {'champion-stats-trend-rate'})
         pc_picrate = pc_rate[1].get_text().strip()
         pc_winrate = pc_rate[0].get_text().strip()
-
 
         s_answer = requests.get(s_link, headers=mobile_hdr)
         s_html_image = s_answer.text
@@ -102,21 +101,17 @@ def home(request):
                         'info': champ}
             pos_rec.append(position)
 
-
-
     user = request.user.is_authenticated
     id_name = request.user.id
     compare_user = UserModel.objects.get(id=id_name)
-
 
     if user:
         if request.method == 'GET':
             compare = compare_user.follow.all()
 
-        return render(request, 'home.html', {'crawling': pos_rec, 'result_rec': result_rec, 'user_list' : compare})
+        return render(request, 'home.html', {'crawling': pos_rec, 'result_rec': result_rec, 'user_list': compare})
     else:
-        return redirect('/sign-in')
-
+        return redirect('/')
 
 
 def sign_in(request):
@@ -130,7 +125,7 @@ def sign_in(request):
 
         if me is not None:
             auth.login(request, me)
-            return redirect('/')
+            return redirect('/home')
         else:
             return render(request, 'entrance.html', {'error': '유저이름 혹은 패스워드를 확인 해 주세요.'})
 
@@ -138,7 +133,7 @@ def sign_in(request):
         user = request.user.is_authenticated
 
         if user:
-            return redirect('/')
+            return redirect('/home')
 
         else:
             return render(request, 'entrance.html')
@@ -151,10 +146,10 @@ def sign_up(request):
         user = request.user.is_authenticated
         # 만약 로그인한 사용자라면 기본페이지로 가게 함.
         if user:
-            return redirect('/')
+            return redirect('/home')
         # 로그인한 상태가 아니라면 회원가입 페이지로 가게끔 함.
         else:
-            return render(request, 'user/signup.html')
+            return render(request, 'entrance.html')
 
     elif request.method == 'POST':
         username = request.POST.get('username', '')
@@ -177,13 +172,13 @@ def sign_up(request):
             # 중복되는 아이디가 없다면
             else:
                 UserModel.objects.create_user(username=username, password=password, nickname=nickname)
-                return redirect('/sign-in')
+                return redirect('/')
 
 
 @login_required
 def logout(request):
     auth.logout(request)
-    return redirect('/sign-in')
+    return redirect('/')
 
 
 @login_required

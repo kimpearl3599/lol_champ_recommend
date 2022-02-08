@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,10 +17,9 @@
     <div class="form-container">
         <div id="entrance-logo"></div>
 
-
         <form class="login" method="post" action="/">
-            {% csrf_token %}
             <p id="login-text">로그인</p>
+            {% csrf_token %}
             <div class="input-container">
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name = "username">
@@ -38,8 +38,9 @@
         </form>
 
         <form class="register" method="post" action="/">
-            {% csrf_token %}
             <p id="login-text">회원 가입</p>
+
+                {% csrf_token %}
                 <div class="input-container">
                     <div class="form-floating mb-3">
                         <input type="email" class="form-control" placeholder="name@example.com" name = "username">
@@ -65,18 +66,15 @@
             <p id="login-text3">이미 회원이신가요? <span id="return-login" onclick="login()">로그인</span></p>
             </form>
         </div>
-
+        
+        <div class="video-area">
+            <video id="player" autoplay loop muted>
+                <source src="../static/login-galio.mp4">
+            </video>
+        </div>
+        <div id="unmutePlayerButton" onclick="unmute()"><span class="material-icons-outlined">volume_off</span></div>
+        <div id="mutePlayerButton" onclick="mute()"><span class="material-icons-outlined">volume_up</span></div>
     </div>
-
-</div>
-
-<div class="video-area">
-    <video id="player" autoplay loop muted>
-        <source src="../static/login-galio.mp4">
-    </video>
-</div>
-<div id="unmutePlayerButton" onclick="unmute()"><span class="material-icons-outlined">volume_off</span></div>
-<div id="mutePlayerButton" onclick="mute()"><span class="material-icons-outlined">volume_up</span></div>
 </div>
 </body>
 
@@ -113,5 +111,3 @@
         player.muted = true;
     }
 </script>
-
-</html>

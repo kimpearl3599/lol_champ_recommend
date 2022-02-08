@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,22 +12,24 @@
 </head>
 <body>
     <div class="home-screen">
+        {% if user.is_authenticated %}
         <div class="nav">
             <div class="recommend-btn-area">
                 <div class="LOL-logo"></div>
-                <div class="recommend-start"><p>추천 시작</p></div>
+                <form class="recommend" method="post" action="/home/">
+                    {% csrf_token %}
+                    <button type="submit" class="recommend-start">추천 시작</button>
+                </form>
             </div>
 
             <div class="LOL-title-logo"></div>
 
             <div class="profile-area">
-                <div id="profile-icon"><img src="../static/image/default-profile-icon.jpg"></div>
-
-                <div id="profile-desc">{{ user.username }}</div>
-
+                <div id="profile-icon"><img src="{{ user.my_img }}"></div>
+                <div id="profile-desc">{{ user.nickname }}</div>
             </div>
-
         </div>
+
         <div class="contents-container">
             <div class="contents-area">
                 <div class="contents">
@@ -34,7 +37,7 @@
                         <div class="recommend-text">추천 챔피언 목록</div>
                         <div class="recommend-container">
                             {% for s in result_rec %}
-
+                                
                                 <div id="rcm1">
                                     <div class="rcm-header">
                                         <div class="rcm-img"><img src="{{ s.rank_img }}"></div>
@@ -56,9 +59,9 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-
+                                
                             {% endfor %}
-
+                            
                         </div>
                     </div>
 
@@ -118,7 +121,7 @@
                             </div>
                             {% endif %}
                         {% endfor %}
-
+                        
                     </div>
                     <div class="stats-box">
                         {% for i in crawling %}
@@ -185,29 +188,25 @@
                         {% for ul in user_list %}
                             <div class="card-body">
                                 <div id="friend-icon"><img src="../static/image/default-profile-icon.jpg"></div>
-                                <h5 class="card-title">{{ ul.username }}</h5>
+                                {% comment %} <h5 class="card-title">{{ ul.username }}</h5> {% endcomment %}
                                 <p class="card-text">
-                                   게임(롤)닉네임 : {{ ul.nickname }}
+                                게임(롤)닉네임 : {{ ul.nickname }}
                                 </p>
                                 {% if ul in user.follow.all %}
-                                    <a href="/user/follow/{{ ul.id }}" class="card-link">[팔로우 취소]</a>
+                                    <a href="/user/follow/{{ ul.id }}" class="card-link">X</a>
                                 {% else %}
                                     <a href="/user/follow/{{ ul.id }}" class="card-link">[팔로우]</a>
                                 {% endif %}
                             </div>
-
                         {% endfor %}
                         </form>
                     </div>
-
-
-
-
-
-                    </div>
+                
                 </div>
             </div>
         </div>
+        {% endif %}
+
     </div>
 </body>
 
@@ -250,4 +249,3 @@
     });
 </script>
 
-</html>

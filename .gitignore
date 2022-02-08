@@ -8,6 +8,11 @@
 lol_clone/settings.py
 lol_clone/config
 .idea
+static/Legends Never Die.mp4
+static/login-galio.mp4
+static/RISE.mp4
+static/The Call.mp4
+static/Warriors.mp4
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

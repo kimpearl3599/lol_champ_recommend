@@ -1,20 +1,24 @@
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from .models import UserModel
+import csv
+import json
+
+import numpy as np
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from bs4 import BeautifulSoup
-import json, requests
-import csv
-import pandas as pd 
-import numpy as np
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
 from sklearn.metrics.pairwise import cosine_similarity
+
+from .models import UserModel
 
 
 
 def find_most(nickname):
     header = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
+    
     user = requests.get(f'https://www.op.gg/summoner/userName={nickname}', headers=header)
     # print(user)
     soup = BeautifulSoup(user.text, 'html.parser')
@@ -28,18 +32,26 @@ def find_most(nickname):
     # print(most_list)
     return most_list
 
-# @login_required
+
 def home(request):
-    user = request.user.is_authenticated
+    
     home_user_id = request.user.id
     user_email= UserModel.objects.get(id=home_user_id)
     result = []
-    
     # 챔피언 추천 부분
     if request.method == 'POST':
         nickname = user_email.nickname
         most_list = find_most(nickname)
-        
+        pc_hdr = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+
+        champ_detail = requests.get(f'https://www.op.gg/champion/{most_list[0]}/statistics/', headers=pc_hdr)
+        soup2 = BeautifulSoup(champ_detail.text, 'html.parser') 
+        champ_image = soup2.find('div', {'class': 'champion-stats-header-info__image'}) 
+        img_path = champ_image.select_one('img')['src']
+        user_email.my_img = img_path
+        user_email.save()
+
         f = open("./user_most.csv", mode="wt", encoding="cp949", newline='')
         writer = csv.writer(f)
 
@@ -74,21 +86,18 @@ def home(request):
         recom_list = []
         for i in range(0, 10):
             users = user_based_collab[nickname].sort_values(ascending=False)[:10].index[i]
-            # 지림
-            # print(users)
             most_result = find_most(users)
-            # print(most_result)
-            for z in most_result:
 
+            for z in most_result:
                 if z not in most_list:
                     recom_list.append(z)
         recom_result = recom_list[:5]
+        
 
         
         mobile_hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': (
         'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
-        pc_hdr = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+        
         url = 'https://www.op.gg/champion/statistics'
         req = requests.get(url, headers=mobile_hdr)
         html = req.text
@@ -101,7 +110,7 @@ def home(request):
         result_rec = []
         rank = ["Best", "Excellent", "Great", "Nice", "Good"]
         img_rank = ["../static/image/tier/challenger.png", "../static/image/tier/grandmaster.png", "../static/image/tier/master.png", "../static/image/tier/diamond.png", "../static/image/tier/platinum.png"]
-
+        
         for i, z in enumerate(recom_result):
             count = []
             
@@ -128,7 +137,6 @@ def home(request):
             s_so = BeautifulSoup(s_html_image, 'html.parser')
 
             champ_src = s_so.select_one('div.champion__image > img')['src']
-
             s_img = s_so.find("table", {
                 "class": 'matchup-summary__list matchup-summary__list--table tabItem ChampionMatchupSummaryTable-Strong'})
             
@@ -180,12 +188,10 @@ def home(request):
                             'info': champ}
                 pos_rec.append(position)
             message += '\n'
-        # print(result_rec)
-        # print(count)
         
         user = request.user.is_authenticated
         if user:
-            return render(request, 'home.html', {'crawling': pos_rec, 'result_rec':result_rec})
+            return render(request, 'home.html', {'crawling': pos_rec, 'result_rec':result_rec, 'profile_img': img_path})
         else:
             return redirect('/')
 
@@ -254,6 +260,7 @@ def sign_up(request):
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
         nickname = request.POST.get('nickname', '')
+        default_user_img = "../static/image/default-profile-icon.jpg"
 
         if password != password2:
             # 패스워드가 같지 않다고 알림
@@ -269,7 +276,7 @@ def sign_up(request):
                 return render(request, 'entrance.html', {'error': '이미 존재하는 아이디입니다.'})
             # 중복되는 아이디가 없다면     
             else:
-                UserModel.objects.create_user(username=username, password=password, nickname=nickname)
+                UserModel.objects.create_user(username=username, password=password, nickname=nickname, my_img=default_user_img)
                 return redirect('/')
 
 
@@ -285,6 +292,7 @@ def user_view(request):
         # 사용자를 불러오기, exclude와 request.user.username 를 사용해서 '로그인 한 사용자'를 제외하기
         # 나를 제외한 사용자의 리스트를 갖고온다.
         user_list = UserModel.objects.all().exclude(username=request.user.username)
+        print(user_list)
         return render(request, 'home.html', {'user_list': user_list})
 
 

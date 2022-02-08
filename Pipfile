@@ -9,6 +9,10 @@ bs4 = "*"
 pandas = "*"
 numpy = "*"
 cosine-similarity = "*"
+requests = "*"
+boto3 = "*"
+django-storages = "*"
+mysqlclient = "*"
 
 [dev-packages]
 

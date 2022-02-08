@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/netflix_clone.iml" filepath="$PROJECT_DIR$/.idea/netflix_clone.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/lol_champ_recommend.iml" filepath="$PROJECT_DIR$/.idea/lol_champ_recommend.iml" />
     </modules>
   </component>
 </project>

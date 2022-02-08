@@ -1,3 +1,4 @@
+
 import csv
 import json
 
@@ -309,6 +310,4 @@ def user_follow(request, id):
     else:
         # 그게 아니라면 추가해줘라
         click_user.followee.add(request.user)
-    return redirect('/user')
-
-
+    return redirect('/chat')

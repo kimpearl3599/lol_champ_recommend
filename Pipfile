@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 django = "*"
+bs4 = "*"
+pandas = "*"
+numpy = "*"
+cosine-similarity = "*"
 
 [dev-packages]
 

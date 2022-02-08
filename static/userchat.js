@@ -1,0 +1,1 @@
+$('.chat_show').scrollTop($('.chat_show')[0].scrollHeight);

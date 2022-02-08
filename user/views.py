@@ -186,7 +186,7 @@ def user_view(request):
     if request.method == 'GET':
         # 사용자를 불러오기, exclude와 request.user.username 를 사용해서 '로그인 한 사용자'를 제외하기
         # 나를 제외한 사용자의 리스트를 갖고온다.
-        user_list = UserModel.objects.all().exclude(username=request.user.username)
+        user_list = UserModel.objects.all().exclude(username=request.user.username).exclude(is_superuser=True)
         return render(request, 'user/user_list.html', {'user_list': user_list})
 
 
@@ -203,4 +203,4 @@ def user_follow(request, id):
     else:
         # 그게 아니라면 추가해줘라
         click_user.followee.add(request.user)
-    return redirect('/user')
+    return redirect('/chat')

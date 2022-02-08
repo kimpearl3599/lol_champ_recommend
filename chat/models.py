@@ -17,7 +17,6 @@ class ReplyModel(models.Model):
     class Meta:
         db_table = 'reply'
 
-    # chat = models.ForeignKey(ChatModel,on_delete=models.CASCADE)
     comment_id = models.ForeignKey(ChatModel, on_delete=models.CASCADE)
     author = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     recomment = models.CharField(max_length=256)

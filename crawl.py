@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import json, requests
+import requests
 import csv
 
 
@@ -98,12 +98,9 @@ for lane in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']:
         position = {'line': lane, 
                     'info': champ}
 
-        # print(position) 
         pos_rec.append(position)
         writer = csv.writer(f) 
         writer.writerow([position]) 
 
     message += '\n'
-# print(result_rec)
-# print(count)
 f.close()

@@ -12,7 +12,7 @@ body {
 
 a {
     text-decoration: none;
-    text-underline: none;
+    /* text-underline: none; */
     color: #735a30;
 }
 

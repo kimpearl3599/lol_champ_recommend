@@ -1,7 +1,6 @@
 
 import csv
 import json
-
 import numpy as np
 import pandas as pd
 import requests
@@ -9,10 +8,8 @@ from bs4 import BeautifulSoup
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from sklearn.metrics.pairwise import cosine_similarity
-
 from .models import UserModel
 
 
@@ -21,16 +18,13 @@ def find_most(nickname):
     header = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
     
     user = requests.get(f'https://www.op.gg/summoner/userName={nickname}', headers=header)
-    # print(user)
     soup = BeautifulSoup(user.text, 'html.parser')
-    # print(soup)
     ur_most_list = soup.find_all("div", attrs={"class":"ChampionName"})
-    # print(ur_most_list)
     most_list = []
 
     for most in ur_most_list:
         most_list.append(most.select_one('a')['href'].split('/')[2])
-    # print(most_list)
+
     return most_list
 
 
@@ -55,7 +49,6 @@ def home(request):
 
         f = open("./user_most.csv", mode="wt", encoding="cp949", newline='')
         writer = csv.writer(f)
-
         writer.writerow(['userId', 'Champions', 'Rating']) 
 
         # 닉변의 변수
@@ -119,24 +112,17 @@ def home(request):
             champs_ko_name = third.find('div', {"by-champion__item-name"}).get_text()
 
             fourth = third.select_one('a')['href']
-
             s_link = ('https://www.op.gg' + fourth)
             pc_answer = requests.get(s_link, headers=pc_hdr)
             pc_html = pc_answer.text
-
             pc_so = BeautifulSoup(pc_html, 'html.parser')
             pc_pic = pc_so.find("div", {"class": 'champion-box-content'})
-
             pc_rate = pc_pic.find_all('div', {'champion-stats-trend-rate'})
-
             pc_picrate = pc_rate[1].get_text().strip()
             pc_winrate = pc_rate[0].get_text().strip()
-
             s_answer = requests.get(s_link, headers=mobile_hdr)
             s_html_image = s_answer.text
-
             s_so = BeautifulSoup(s_html_image, 'html.parser')
-
             champ_src = s_so.select_one('div.champion__image > img')['src']
             s_img = s_so.find("table", {
                 "class": 'matchup-summary__list matchup-summary__list--table tabItem ChampionMatchupSummaryTable-Strong'})
@@ -202,7 +188,6 @@ def home(request):
         rdr = csv.reader(f)
         for line in rdr: 
             json_test = json.loads(line[0].replace("'", '"'))
-            # print(json_test)
             result.append(json_test)
 
         user = request.user.is_authenticated
@@ -224,7 +209,6 @@ def sign_in(request):
     if request.method == 'POST':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
-
         # DB에 저장되어 있는 암호화되어있는 비밀번호와 내가 로그인하려는 정보의 비밀번호가 갖는지 알기위해 authenticate()메소드를 활용한다.
         me = auth.authenticate(request, username=username, password=password)
 

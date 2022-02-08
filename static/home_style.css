@@ -96,7 +96,7 @@
 }
 
 #profile-desc {
-    width: 10vw;
+    width: 8vw;
     height: 4vh;
     margin-left: 1vw;
     color: floralwhite;
@@ -104,6 +104,11 @@
     font-size: 1.3rem;
     display: flex;
     align-items: center;
+}
+
+#logout {
+    text-decoration: none;
+    color: #735a30;
 }
 
 .contents-container {

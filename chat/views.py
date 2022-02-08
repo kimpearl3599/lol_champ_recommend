@@ -19,13 +19,8 @@ def home(request):
 @login_required
 def chat_list(request):
     if request.method == 'GET':
-        
-
-        all_user = UserModel.my_img
-        # print(all_user)
         user_list = UserModel.objects.all().exclude(username=request.user.username).exclude(is_superuser=True)
-        
-
+        print(user_list)
         return render(request, 'chat_list.html', {'user_list': user_list})
 
 
@@ -35,7 +30,6 @@ def show_chat(request, id):
         
         user_list = UserModel.objects.all().exclude(username=request.user.username).exclude(is_superuser=True)
         chat_user = get_user_model().objects.get(id=id)
-        print(chat_user.my_img)
         all_chats = ChatModel.objects.filter(
             Q(chat_id=id, author_id=request.user.id) | Q(chat_id=request.user.id, author_id=id)).order_by(
             'created_at')

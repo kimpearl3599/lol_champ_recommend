@@ -27,6 +27,7 @@
             <div class="profile-area">
                 <div id="profile-icon"><img src="{{ user.my_img }}"></div>
                 <div id="profile-desc">{{ user.nickname }}</div>
+                <div><a href="/logout">logout</a></div>
             </div>
         </div>
 
@@ -178,7 +179,7 @@
                     <div class="community-text">커뮤니티</div>
                     <div class="community-icons">
                         <span class="material-icons-outlined">person_add_alt</span>
-                        <span class="material-icons-outlined">format_list_bulleted</span>
+                        <a href="/chat"><span class="material-icons-outlined">chat_bubble</span></a>
                         <span class="material-icons-outlined">search</span>
                     </div>
                 </div>

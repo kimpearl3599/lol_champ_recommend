@@ -97,7 +97,7 @@ for lane in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']:
 
         position = {'line': lane, 
                     'info': champ}
-
+ 
         pos_rec.append(position)
         writer = csv.writer(f) 
         writer.writerow([position]) 

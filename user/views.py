@@ -107,7 +107,6 @@ def home(request):
         # 시작
         first = s.find("div", {"class": 'by-champion__wrapper by-champion__wrapper--champion-list'})
         second = first.select_one('div')
-        pos_rec = []
         result_rec = []
         rank = ["Best", "Excellent", "Great", "Nice", "Good"]
         img_rank = ["../static/image/tier/challenger.png", "../static/image/tier/grandmaster.png", "../static/image/tier/master.png", "../static/image/tier/diamond.png", "../static/image/tier/platinum.png"]
@@ -151,12 +150,20 @@ def home(request):
             result_rec.append(rec_champ_list)
 
         # 끝
+        result = []
+        f = open('./lol_chams.csv', encoding='cp949')
+        rdr = csv.reader(f)
+        for line in rdr:
+            json_test = json.loads(line[0].replace("'", '"'))
+            result.append(json_test)
+        f.close()
+
         user = request.user.is_authenticated
         id_name = request.user.id
         compare_user = UserModel.objects.get(id=id_name)
         compare = compare_user.follow.all()
         if user:
-            return render(request, 'home.html', {'crawling': pos_rec, 'result_rec':result_rec, 'profile_img': img_path, 'user_list':compare})
+            return render(request, 'home.html', {'crawling': result, 'result_rec':result_rec, 'profile_img': img_path, 'user_list':compare})
         else:
             return redirect('/')
 
@@ -251,4 +258,4 @@ def user_follow(request, id):
     else:
         # 그게 아니라면 추가해줘라
         click_user.followee.add(request.user)
-    return redirect('/home')
+    return redirect('/chat')

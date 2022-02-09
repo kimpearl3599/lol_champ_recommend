@@ -62,6 +62,13 @@
     cursor: pointer;
 }
 
+#start-button {
+    background: none;
+    border: none;
+    color: floralwhite;
+    font-weight: bold;
+}
+
 .LOL-title-logo {
     width: 10vw;
     height: 100%;
@@ -107,8 +114,10 @@
 }
 
 #logout {
+    margin: auto;
     text-decoration: none;
-    color: #735a30;
+    color: rgb(205, 190, 145);
+    font-weight: bold;
 }
 
 .contents-container {
@@ -203,6 +212,8 @@
 }
 
 .rcm-img {
+    position: relative;
+    left: -0.5vw;
     width: 30%;
     height: 80%;
 }
@@ -214,6 +225,8 @@
 }
 
 .rcm-text {
+    position: relative;
+    left: -0.5vw;
     width: 70%;
     height: 80%;
     margin-left: 0.3rem;
@@ -292,22 +305,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-#rcm2 {
-    flex:1;
-}
-
-#rcm3 {
-    flex: 1;
-}
-
-#rcm4 {
-    flex: 1;
-}
-
-#rcm5 {
-    flex: 1;
 }
 
 .video-area {
@@ -463,6 +460,7 @@
     color: rgb(205, 190, 145);
 }
 
+
 .community {
     width: 18%;
     height: 100%;
@@ -478,7 +476,7 @@
 }
 
 .community-text {
-    width:20%;
+    width:30%;
     height: 100%;
     margin: 1vh 1vw;
     color: rgb(205, 190, 145);
@@ -486,9 +484,11 @@
 }
 
 .community-icons {
-    width: 28%;
+    width: 10%;
     height: 100%;
-    margin: 1vh 1vw;
+    margin: 1.2vh 1vw;
+    display: flex;
+    justify-content: space-around;
 }
 
 .material-icons-outlined {
@@ -498,24 +498,29 @@
 }
 
 .friend-container {
+    width: 100%;
     margin-top: 3vh;
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
 #friend-icon {
     width: 2.4vw;
     height: 4.6vh;
-    margin-left: 1vw;
+    overflow: hidden;
     border: 1.5px solid goldenrod;
     border-radius: 100%;
-    overflow:hidden;
+    display: flex;
+    justify-content: center;
+
 }
 
 #friend-icon img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+
 }
 
 #friend-desc {
@@ -529,3 +534,29 @@
     align-items: center;
 }
 
+.card-body {
+    align-items: center;
+    display: flex;
+    width: 100%;
+
+}
+
+.card-text{
+    width: 10vw;
+    margin: auto 1vw;
+    color: floralwhite;
+}
+
+.card-name{
+    font-size: 0.8rem;
+    margin: auto;
+}
+.card-nick{
+    margin: auto;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.card-link {
+    margin-left: 0.2vw;
+    width: 1vw;
+}

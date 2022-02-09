@@ -16,10 +16,12 @@
         <div class="nav">
             <div class="recommend-btn-area">
                 <div class="LOL-logo"></div>
-                <form class="recommend" method="post" action="/home/">
-                    {% csrf_token %}
-                    <button type="submit" class="recommend-start">추천 시작</button>
-                </form>
+                <div class="recommend-start">
+                    <form method="post" action="/home/">
+                        {% csrf_token %}
+                        <button id="start-button" type="submit">추천 시작</button>
+                    </form>
+                </div>
             </div>
 
             <div class="LOL-title-logo"></div>
@@ -27,7 +29,7 @@
             <div class="profile-area">
                 <div id="profile-icon"><img src="{{ user.my_img }}"></div>
                 <div id="profile-desc">{{ user.nickname }}</div>
-                <div id="logout"><a href="/logout">로그아웃</a></div>
+                <a id="logout" href="/logout">로그아웃</a>
             </div>
         </div>
 
@@ -178,9 +180,7 @@
                 <div class="community-nav">
                     <div class="community-text">커뮤니티</div>
                     <div class="community-icons">
-                        <span class="material-icons-outlined">person_add_alt</span>
                         <a href="/chat"><span class="material-icons-outlined">chat_bubble</span></a>
-                        <span class="material-icons-outlined">search</span>
                     </div>
                 </div>
                 <div class="friend-list">
@@ -188,21 +188,18 @@
                         <form class="friend" method="get" action="/user/">
                         {% for ul in user_list %}
                             <div class="card-body">
-                                <div id="friend-icon"><img src="../static/image/default-profile-icon.jpg"></div>
-                                {% comment %} <h5 class="card-title">{{ ul.username }}</h5> {% endcomment %}
-                                <p class="card-text">
-                                게임(롤)닉네임 : {{ ul.nickname }}
-                                </p>
+                                <div id="friend-icon"><img src="{{ ul.my_img }}"></div>
+                                <div class="card-text">
+                                    <p class="card-nick">{{ ul.nickname }}</p>
+                                    <h5 class="card-name">{{ ul.username }}</h5>
+                                </div>
                                 {% if ul in user.follow.all %}
-                                    <a href="/user/follow/{{ ul.id }}" class="card-link">X</a>
-                                {% else %}
-                                    <a href="/user/follow/{{ ul.id }}" class="card-link">[팔로우]</a>
+                                    <a href="/user/follow/{{ ul.id }}" class="card-link"><span class="material-icons-outlined">close</span></a>
                                 {% endif %}
                             </div>
                         {% endfor %}
                         </form>
                     </div>
-                
                 </div>
             </div>
         </div>

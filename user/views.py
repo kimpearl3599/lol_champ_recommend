@@ -1,7 +1,5 @@
-
 import csv
 import json
-
 import numpy as np
 import pandas as pd
 import requests
@@ -9,43 +7,51 @@ from bs4 import BeautifulSoup
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from sklearn.metrics.pairwise import cosine_similarity
-
 from .models import UserModel
-
 
 
 def find_most(nickname):
     header = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
     
     user = requests.get(f'https://www.op.gg/summoner/userName={nickname}', headers=header)
-    # print(user)
     soup = BeautifulSoup(user.text, 'html.parser')
-    # print(soup)
     ur_most_list = soup.find_all("div", attrs={"class":"ChampionName"})
-    # print(ur_most_list)
     most_list = []
 
     for most in ur_most_list:
         most_list.append(most.select_one('a')['href'].split('/')[2])
-    # print(most_list)
+
     return most_list
 
 
 def home(request):
-    
-    home_user_id = request.user.id
-    user_email= UserModel.objects.get(id=home_user_id)
-    result = []
     # 챔피언 추천 부분
-    if request.method == 'POST':
+    if request.method == 'GET':
+        user = request.user.is_authenticated
+        if user:
+            result = []
+            f = open('./lol_chams.csv', encoding='cp949')
+            rdr = csv.reader(f)
+            for line in rdr:
+                json_test = json.loads(line[0].replace("'", '"'))
+                result.append(json_test)
+            f.close()
+            id_name = request.user.id
+            compare_user = UserModel.objects.get(id=id_name)
+            compare = compare_user.follow.all()
+
+            return render(request, 'home.html', {'crawling': result, 'user_list': compare})
+        else:
+            return redirect('/')
+
+    elif request.method == 'POST':
+        home_user_id = request.user.id
+        user_email = UserModel.objects.get(id=home_user_id)
         nickname = user_email.nickname
         most_list = find_most(nickname)
-        pc_hdr = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-
+        pc_hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
         champ_detail = requests.get(f'https://www.op.gg/champion/{most_list[0]}/statistics/', headers=pc_hdr)
         soup2 = BeautifulSoup(champ_detail.text, 'html.parser') 
         champ_image = soup2.find('div', {'class': 'champion-stats-header-info__image'}) 
@@ -55,7 +61,6 @@ def home(request):
 
         f = open("./user_most.csv", mode="wt", encoding="cp949", newline='')
         writer = csv.writer(f)
-
         writer.writerow(['userId', 'Champions', 'Rating']) 
 
         # 닉변의 변수
@@ -72,11 +77,9 @@ def home(request):
         champs = pd.read_csv('./lol_champs.csv')
         user_most = pd.read_csv('./user_most.csv', encoding="cp949")
         merged = pd.concat([highrank, user_most])
-        # print(merged)
 
         pd.set_option('display.max_columns', 10)
         pd.set_option('display.width', 300)
-
 
         champs_ratings = pd.merge(merged, champs, on='Champions')
         user_favorite = champs_ratings.pivot_table('Rating', index='userId', columns='Champions')
@@ -85,6 +88,7 @@ def home(request):
         user_based_collab = pd.DataFrame(user_based_collab, index=user_favorite.index, columns=user_favorite.index)
         
         recom_list = []
+
         for i in range(0, 10):
             users = user_based_collab[nickname].sort_values(ascending=False)[:10].index[i]
             most_result = find_most(users)
@@ -92,13 +96,10 @@ def home(request):
             for z in most_result:
                 if z not in most_list:
                     recom_list.append(z)
-        recom_result = recom_list[:5]
-        
 
-        
-        mobile_hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': (
-        'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
-        
+        recom_result = recom_list[:5]
+
+        mobile_hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
         url = 'https://www.op.gg/champion/statistics'
         req = requests.get(url, headers=mobile_hdr)
         html = req.text
@@ -106,41 +107,29 @@ def home(request):
         # 시작
         first = s.find("div", {"class": 'by-champion__wrapper by-champion__wrapper--champion-list'})
         second = first.select_one('div')
-        ab = []
-        pos_rec = []
         result_rec = []
         rank = ["Best", "Excellent", "Great", "Nice", "Good"]
         img_rank = ["../static/image/tier/challenger.png", "../static/image/tier/grandmaster.png", "../static/image/tier/master.png", "../static/image/tier/diamond.png", "../static/image/tier/platinum.png"]
-        
+
         for i, z in enumerate(recom_result):
             count = []
-            
             third = second.find('div', {"data-champion-key": z})
             champs_ko_name = third.find('div', {"by-champion__item-name"}).get_text()
-
             fourth = third.select_one('a')['href']
-
             s_link = ('https://www.op.gg' + fourth)
             pc_answer = requests.get(s_link, headers=pc_hdr)
             pc_html = pc_answer.text
-
             pc_so = BeautifulSoup(pc_html, 'html.parser')
             pc_pic = pc_so.find("div", {"class": 'champion-box-content'})
-
             pc_rate = pc_pic.find_all('div', {'champion-stats-trend-rate'})
-
             pc_picrate = pc_rate[1].get_text().strip()
             pc_winrate = pc_rate[0].get_text().strip()
-
             s_answer = requests.get(s_link, headers=mobile_hdr)
             s_html_image = s_answer.text
-
             s_so = BeautifulSoup(s_html_image, 'html.parser')
-
             champ_src = s_so.select_one('div.champion__image > img')['src']
-            s_img = s_so.find("table", {
-                "class": 'matchup-summary__list matchup-summary__list--table tabItem ChampionMatchupSummaryTable-Strong'})
-            
+            s_img = s_so.find("table", {"class": 'matchup-summary__list matchup-summary__list--table tabItem ChampionMatchupSummaryTable-Strong'})
+
             for u in range(1, 4):
                 ab = s_img.select_one('tr:nth-child(' + str(u) + ')> td > img')['src']
                 count.append(ab)
@@ -161,62 +150,22 @@ def home(request):
             result_rec.append(rec_champ_list)
 
         # 끝
-        for lane in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']:
-            message = lane + ' 상위 5 챔피언\n'
-            soup = s.find("div", {"class": "detail-ranking__content detail-ranking__content--champ-list ChampionRankingList-WinRatio-{} tabItem".format(lane)})
-            paths = soup.select_one('ul')
-            names = soup.find_all("div", {"class": "champion-ratio__name"})[:5]
-            infos = soup.find_all("div", {"class": "champion-ratio__percent"})[:10]
-            num = ['1st', '2nd', '3rd', '4th', '5th']
-
-            for idx in range(1, 6):
-                path = paths.select_one('li:nth-child(' + str(idx) + ')>a')['href']
-                link = ('https://www.op.gg' + path)
-                answer = requests.get(link, headers=mobile_hdr)
-                html_image = answer.text
-                so = BeautifulSoup(html_image, 'html.parser')
-                soup_image = so.find("div", {"class": "champion tabWrap"})
-                aa = soup_image.select_one('div > div > img')
-                image_list = aa['src']
-
-                champ = {'num': num[idx-1],
-                        'name': names[idx - 1].text.strip(),
-                        'win': infos[2 * (idx - 1)].text.strip().replace('\n', ' '),
-                        'pick': infos[2 * (idx - 1) + 1].text.strip().replace('\n', ' '),
-                        'img' : image_list}
-
-                position = {'line': lane, 
-                            'info': champ}
-                pos_rec.append(position)
-            message += '\n'
-        
-        user = request.user.is_authenticated
-        if user:
-            return render(request, 'home.html', {'crawling': pos_rec, 'result_rec':result_rec, 'profile_img': img_path})
-        else:
-            return redirect('/')
-
-    else:
+        result = []
         f = open('./lol_chams.csv', encoding='cp949')
-        
         rdr = csv.reader(f)
-        for line in rdr: 
+        for line in rdr:
             json_test = json.loads(line[0].replace("'", '"'))
-            # print(json_test)
             result.append(json_test)
+        f.close()
 
         user = request.user.is_authenticated
         id_name = request.user.id
         compare_user = UserModel.objects.get(id=id_name)
-        
+        compare = compare_user.follow.all()
         if user:
-            if request.method == 'GET':
-                compare = compare_user.follow.all()
-
-            return render(request, 'home.html', {'crawling':result, 'user_list': compare})
+            return render(request, 'home.html', {'crawling': result, 'result_rec':result_rec, 'profile_img': img_path, 'user_list':compare})
         else:
             return redirect('/')
-
 
 
 def sign_in(request):
@@ -224,7 +173,6 @@ def sign_in(request):
     if request.method == 'POST':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
-
         # DB에 저장되어 있는 암호화되어있는 비밀번호와 내가 로그인하려는 정보의 비밀번호가 갖는지 알기위해 authenticate()메소드를 활용한다.
         me = auth.authenticate(request, username=username, password=password)
 

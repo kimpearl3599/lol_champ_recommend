@@ -42,8 +42,10 @@
     width: 7vw;
     height: 5vh;
     margin: auto;
+    background: transparent;
+    border: none;
     border-radius: 5px;
-    box-shadow: 2px 2px 5px lightgray;
+    box-shadow: 3px 3px 8px lightgray;
     padding: 1%;
     display: flex;
     align-items: center;
@@ -54,9 +56,11 @@
     width: 9vw;
     height: 6vh;
     margin: auto;
+    background: transparent;
+    border: none;
     border-radius: 5px;
     padding:1%;
-    box-shadow: 2px 2px 3px lightgray;
+    box-shadow: 3px 3px 8px lightgray;
     display: flex;
     align-items: center;
     cursor: pointer;

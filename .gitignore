@@ -4,6 +4,11 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 ### Python ###
+#lol_clone / settings.py / config
+lol_clone/settings.py
+lol_clone/config
+.idea
+static/*.mp4
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

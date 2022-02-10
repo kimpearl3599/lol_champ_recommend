@@ -5,8 +5,8 @@
 
 ### Python ###
 #lol_clone / settings.py / config
-lol_clone/settings.py
-lol_clone/config/aws.json
+settings.py
+aws.json
 
 .idea/
 static/*.mp4

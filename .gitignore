@@ -6,7 +6,7 @@
 ### Python ###
 #lol_clone / settings.py / config
 lol_clone/settings.py
-lol_clone/config/
+lol_clone/config/aws.json
 
 .idea/
 static/*.mp4

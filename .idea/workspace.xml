@@ -6,13 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b8458a1b-3ea5-471a-8c2b-abd2076108a6" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/92665339-3590-4060-8554-6ae7814f90b6.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/92665339-3590-4060-8554-6ae7814f90b6/storage_v2/_src_/schema/main.uQUzAA.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/a87f8c2e-e9e6-4fb5-804a-e8018e74ecc0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/lol_champ_recommend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/lol_champ_recommend.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +127,7 @@
       <option name="presentableId" value="Default" />
       <updated>1644333102743</updated>
       <workItem from="1644333138266" duration="15361000" />
-      <workItem from="1644503005315" duration="283000" />
+      <workItem from="1644503005315" duration="625000" />
     </task>
     <servers />
   </component>
